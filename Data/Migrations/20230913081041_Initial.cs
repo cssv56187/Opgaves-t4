@@ -3,14 +3,14 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Opgavesæt4.Migrations
+namespace Opgavesæt4.Data.Migrations
 {
-    public partial class @new : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Artist",
+                name: "Artists",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -19,7 +19,7 @@ namespace Opgavesæt4.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Artist", x => x.Id);
+                    table.PrimaryKey("PK_Artists", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -62,7 +62,7 @@ namespace Opgavesæt4.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Genre",
+                name: "Genres",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -72,7 +72,7 @@ namespace Opgavesæt4.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Genre", x => x.Id);
+                    table.PrimaryKey("PK_Genres", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -182,27 +182,27 @@ namespace Opgavesæt4.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Playlist",
+                name: "Playlists",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Playlist", x => x.Id);
+                    table.PrimaryKey("PK_Playlists", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Playlist_AspNetUsers_UserId",
-                        column: x => x.UserId,
+                        name: "FK_Playlists_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
-                name: "Album",
+                name: "Albums",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -215,23 +215,23 @@ namespace Opgavesæt4.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Album", x => x.Id);
+                    table.PrimaryKey("PK_Albums", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Album_Artist_ArtistId",
+                        name: "FK_Albums_Artists_ArtistId",
                         column: x => x.ArtistId,
-                        principalTable: "Artist",
+                        principalTable: "Artists",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Album_Genre_GenreId",
+                        name: "FK_Albums_Genres_GenreId",
                         column: x => x.GenreId,
-                        principalTable: "Genre",
+                        principalTable: "Genres",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Song",
+                name: "Songs",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -239,32 +239,76 @@ namespace Opgavesæt4.Migrations
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Url = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PlaylistId = table.Column<int>(type: "int", nullable: true),
-                    AlbumId = table.Column<int>(type: "int", nullable: false)
+                    AlbumId = table.Column<int>(type: "int", nullable: false),
+                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Song", x => x.Id);
+                    table.PrimaryKey("PK_Songs", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Song_Album_AlbumId",
+                        name: "FK_Songs_Albums_AlbumId",
                         column: x => x.AlbumId,
-                        principalTable: "Album",
+                        principalTable: "Albums",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Song_Playlist_PlaylistId",
+                        name: "FK_Songs_Playlists_PlaylistId",
                         column: x => x.PlaylistId,
-                        principalTable: "Playlist",
+                        principalTable: "Playlists",
                         principalColumn: "Id");
                 });
 
+            migrationBuilder.InsertData(
+                table: "Artists",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Artist1" },
+                    { 2, "Artist2" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Genres",
+                columns: new[] { "Id", "Description", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Rock music genre", "Rock" },
+                    { 2, "Pop music genre", "Pop" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Playlists",
+                columns: new[] { "Id", "ApplicationUserId", "Name", "UserId" },
+                values: new object[] { 1, null, "My Playlist", null });
+
+            migrationBuilder.InsertData(
+                table: "Albums",
+                columns: new[] { "Id", "AlbumArtUrl", "ArtistId", "GenreId", "Price", "Title" },
+                values: new object[] { 1, "test", 1, 1, 9.99m, "Album1" });
+
+            migrationBuilder.InsertData(
+                table: "Albums",
+                columns: new[] { "Id", "AlbumArtUrl", "ArtistId", "GenreId", "Price", "Title" },
+                values: new object[] { 2, "test", 2, 2, 12.99m, "Album2" });
+
+            migrationBuilder.InsertData(
+                table: "Songs",
+                columns: new[] { "Id", "AlbumId", "Name", "PlaylistId", "Url" },
+                values: new object[] { 1, 1, "Song1", 1, "song1-url" });
+
+            migrationBuilder.InsertData(
+                table: "Songs",
+                columns: new[] { "Id", "AlbumId", "Name", "PlaylistId", "Url" },
+                values: new object[] { 2, 1, "Song2", 1, "song2-url" });
+
             migrationBuilder.CreateIndex(
-                name: "IX_Album_ArtistId",
-                table: "Album",
+                name: "IX_Albums_ArtistId",
+                table: "Albums",
                 column: "ArtistId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Album_GenreId",
-                table: "Album",
+                name: "IX_Albums_GenreId",
+                table: "Albums",
                 column: "GenreId");
 
             migrationBuilder.CreateIndex(
@@ -307,18 +351,18 @@ namespace Opgavesæt4.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Playlist_UserId",
-                table: "Playlist",
-                column: "UserId");
+                name: "IX_Playlists_ApplicationUserId",
+                table: "Playlists",
+                column: "ApplicationUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Song_AlbumId",
-                table: "Song",
+                name: "IX_Songs_AlbumId",
+                table: "Songs",
                 column: "AlbumId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Song_PlaylistId",
-                table: "Song",
+                name: "IX_Songs_PlaylistId",
+                table: "Songs",
                 column: "PlaylistId");
         }
 
@@ -340,22 +384,22 @@ namespace Opgavesæt4.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Song");
+                name: "Songs");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "Album");
+                name: "Albums");
 
             migrationBuilder.DropTable(
-                name: "Playlist");
+                name: "Playlists");
 
             migrationBuilder.DropTable(
-                name: "Artist");
+                name: "Artists");
 
             migrationBuilder.DropTable(
-                name: "Genre");
+                name: "Genres");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

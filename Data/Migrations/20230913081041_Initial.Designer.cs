@@ -12,14 +12,14 @@ using Opgavesæt4.Data;
 namespace Opgavesæt4.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230906102142_Initial")]
+    [Migration("20230913081041_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "6.0.20")
+                .HasAnnotation("ProductVersion", "6.0.21")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
@@ -104,10 +104,12 @@ namespace Opgavesæt4.Data.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ProviderKey")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
@@ -144,10 +146,12 @@ namespace Opgavesæt4.Data.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("LoginProvider")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
@@ -188,7 +192,27 @@ namespace Opgavesæt4.Data.Migrations
 
                     b.HasIndex("GenreId");
 
-                    b.ToTable("Album");
+                    b.ToTable("Albums");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AlbumArtUrl = "test",
+                            ArtistId = 1,
+                            GenreId = 1,
+                            Price = 9.99m,
+                            Title = "Album1"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            AlbumArtUrl = "test",
+                            ArtistId = 2,
+                            GenreId = 2,
+                            Price = 12.99m,
+                            Title = "Album2"
+                        });
                 });
 
             modelBuilder.Entity("Opgavesæt4.Models.ApplicationUser", b =>
@@ -270,7 +294,19 @@ namespace Opgavesæt4.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Artist");
+                    b.ToTable("Artists");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Artist1"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Artist2"
+                        });
                 });
 
             modelBuilder.Entity("Opgavesæt4.Models.Genre", b =>
@@ -291,7 +327,21 @@ namespace Opgavesæt4.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Genre");
+                    b.ToTable("Genres");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Rock music genre",
+                            Name = "Rock"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Pop music genre",
+                            Name = "Pop"
+                        });
                 });
 
             modelBuilder.Entity("Opgavesæt4.Models.Playlist", b =>
@@ -302,19 +352,28 @@ namespace Opgavesæt4.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("ApplicationUserId");
 
-                    b.ToTable("Playlist");
+                    b.ToTable("Playlists");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "My Playlist"
+                        });
                 });
 
             modelBuilder.Entity("Opgavesæt4.Models.Song", b =>
@@ -335,6 +394,12 @@ namespace Opgavesæt4.Data.Migrations
                     b.Property<int?>("PlaylistId")
                         .HasColumnType("int");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<string>("Url")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -345,7 +410,25 @@ namespace Opgavesæt4.Data.Migrations
 
                     b.HasIndex("PlaylistId");
 
-                    b.ToTable("Song");
+                    b.ToTable("Songs");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AlbumId = 1,
+                            Name = "Song1",
+                            PlaylistId = 1,
+                            Url = "song1-url"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            AlbumId = 1,
+                            Name = "Song2",
+                            PlaylistId = 1,
+                            Url = "song2-url"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -420,13 +503,9 @@ namespace Opgavesæt4.Data.Migrations
 
             modelBuilder.Entity("Opgavesæt4.Models.Playlist", b =>
                 {
-                    b.HasOne("Opgavesæt4.Models.ApplicationUser", "User")
+                    b.HasOne("Opgavesæt4.Models.ApplicationUser", null)
                         .WithMany("Playlists")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
+                        .HasForeignKey("ApplicationUserId");
                 });
 
             modelBuilder.Entity("Opgavesæt4.Models.Song", b =>
