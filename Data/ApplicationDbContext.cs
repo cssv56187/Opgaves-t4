@@ -9,7 +9,7 @@ using System;
 
 namespace Opgavesæt4.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -20,11 +20,12 @@ namespace Opgavesæt4.Data
         public DbSet<Album> Albums { get; set; }
         public DbSet<Artist> Artists { get; set; }
         public DbSet<Genre> Genres { get; set; }
-
         public DbSet<Song> Songs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             // Seed data for Genre
             modelBuilder.Entity<Genre>().HasData(
                 new Genre { Id = 1, Name = "Rock", Description = "Rock music genre" },
@@ -95,30 +96,28 @@ namespace Opgavesæt4.Data
         }
 
         public static void SeedApplicationUsers(UserManager<ApplicationUser> userManager, ApplicationDbContext _context)
-    {
+        {
         // Check if the user already exists
             if (userManager.FindByEmailAsync("user@example.com").Result == null)
-        {
-            ApplicationUser user = new ApplicationUser
             {
-                UserName = "user@example.com",
-                Email = "user@example.com",
-                EmailConfirmed = true
-                // Add other properties as needed
-                };
-            IdentityResult result = userManager.CreateAsync(user, "YourPassword123!").Result;
-            if (result.Succeeded)
-            {
-                var playlists = _context.Playlists.Where(p => p.Id == 1).ToList();
-                foreach (var playlist in playlists)
+                ApplicationUser user = new ApplicationUser
                 {
-                    playlist.UserId = user.Id;
+                    UserName = "user@example.com",
+                    Email = "user@example.com",
+                    EmailConfirmed = true
+                    // Add other properties as needed
+                    };
+                IdentityResult result = userManager.CreateAsync(user, "YourPassword123!").Result;
+                if (result.Succeeded)
+                {
+                    var playlists = _context.Playlists.Where(p => p.Id == 1).ToList();
+                    foreach (var playlist in playlists)
+                    {
+                        playlist.UserId = user.Id;
+                    }
+                    _context.SaveChanges();
                 }
-                _context.SaveChanges();
             }
         }
-    }
-
-  
     }
 }
